@@ -1,4 +1,5 @@
-# DESAFIO 1 CURSO BACKEND CODERHOUSE
+#                                                              CURSO BACKEND CODERHOUSE
+# DESAFIO-1 
 
 ## CONSIGNA
 - Realizar una clase "ProductManager" que gestione un conjunto de productos.
