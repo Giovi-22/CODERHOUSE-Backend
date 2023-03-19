@@ -1,23 +1,30 @@
 const fs = require('fs');
 
 class ProductManager{
-    #products;
-    #autoID=1;
+    #autoID;
     #path;
 
     constructor(pathFile){
             this.#path = pathFile;
-            this.#products = [];
+            this.#autoID = 1;
     } 
-    async loadData(){
+
+
+
+    async _loadData(){
         try {
-            console.log("ejecutando loadData")
-            const productsFile = await this.getProducts();
-            this.#products=productsFile;
-            return "Datos cargados con éxito!";
+            const productsFile = await fs.promises.readFile(this.#path,"utf-8");
+            const products = JSON.parse(productsFile);
+            if(products.length === 0){
+                return [];
+            }
+            return products; 
         } catch (error) {
-            return error.message;
-        } 
+            console.log("El archivo no existe");
+            console.log(`creando ${this.#path} ...`);
+            await fs.promises.writeFile(this.#path,JSON.stringify([]),"utf-8");
+            return [];
+        }
     }
     async addProduct(product){
         try {
@@ -26,69 +33,64 @@ class ProductManager{
             if(!title || !description || !price || !thumbnail || !code || !stock){
                 throw new Error("Error, Todos los campos deben ser completados");
             }
-            const productExist = this.#products.find(element=> element.code === product.code);
-            if(productExist){
-                throw new Error("Error, Ya existe un producto con el mismo codigo");
+            const productsFile = await this._loadData();
+            if(productsFile.length !== 0){
+                const productExist = productsFile.find(element=> element.code === product.code);
+                if(productExist){
+                    throw new Error("Error, Ya existe un producto con el mismo codigo");
+                }
+                this.#autoID = productsFile[productsFile.length-1].id + 1;
             }
-            const newProduct = {...product,id: this.#autoID};
-            this.#products.push(newProduct);
-            this.#autoID = this.#autoID + 1;
-            await fs.promises.writeFile(this.#path,JSON.stringify(this.#products),"utf-8");
+            productsFile.push({...product, id:this.#autoID});
+            await fs.promises.writeFile(this.#path,JSON.stringify(productsFile,null,2),"utf-8");
             return "Producto agregado con éxito!";
         } catch (error) {
             return error.message; 
         }
 
     }
-    async getProducts(callback){
+    async getProducts(){
         try {
-            console.log("ejecutando getProducts")
-            const productsFile = await fs.promises.readFile(this.#path,"utf-8");
-            return JSON.parse(productsFile);    
+            const productsFile = await this._loadData();
+            if(productsFile.length === 0){
+                return [];
+            }
+            return productsFile;    
         } catch (error) {
-            console.log("El archivo no existe");
-            console.log(`creando ${this.#path} ...`);
-            await fs.promises.writeFile(this.#path,JSON.stringify([]),"utf-8");
-            return [];
+           return error.message;
            
         }
         }
 
     async getProductById(productId){
         try {
-            if(!productId || typeof productId !== "number"){
-                throw new Error("EL id es incorrecto");
+            const productsFile = await this._loadData();
+            if(productsFile.length === 0){
+                return "La lista esta vacía";
             }
-            const result = await fs.promises.readFile(this.#path,"utf-8");
-            if(!result){
-                throw new Error("No se encontraron productos en el archivo");
-            }
-            const products = JSON.parse(result);
-            const product = products.find(element => element.id === productId);
+            const product = productsFile.find(element => element.id === productId);
             if(!product){
                 throw new Error(`El producto con id ${productId} no existe`);
             }
             return product;
         } catch (error) {
-            return `No se pudo obtener el producto: ${error.message}`;
+            return `Error: ${error.message}`;
         }
 
     }
 
     async update(productId,product){
         try {
-            const products = await this.getProducts();
-            if(products.lenght === 0){
+            const productsFile = await this._loadData();
+            if(productsFile.length === 0){
                 throw new Error("La lista esta vacía")
             }
-            const wantedProduct = products.find(element => element.id === productId);
-            if(!wantedProduct){
+            const exist = productsFile.find(element => element.id === productId);
+            if(!exist){
                 throw new Error(`El producto con id ${productId} no existe`);
             }
-            const updatedProduct = {...wantedProduct,...product}
-            const updatedList = updateList(updatedProduct,products);
-            this.#products = [...updatedList];
-            await fs.promises.writeFile(this.#path,JSON.stringify(updatedList),"utf-8");
+            const updatedList = this.#_updateList({...exist,...product},productsFile);
+            await fs.promises.writeFile(this.#path,JSON.stringify(updatedList,null,2),"utf-8");
             return "Productos actualizados con éxito";
         } catch (error) {
             return error.message;
@@ -96,25 +98,30 @@ class ProductManager{
     }
     async delete(productId){         
             try {
-                const products = await this.getProducts();
-                const newProducts  = products.filter(element => element.id !== productId);
-                this.#products = [...newProducts];
-                await fs.promises.writeFile(this.#path,JSON.stringify(this.#products),"utf-8");
-                return "Elemento eliminado! "
+                const productsFile = await this._loadData();
+                if(productsFile.length === 0){
+                    throw new Error("La lista esta vacía")
+                }
+                const newProducts  = productsFile.filter(element => element.id !== productId);
+                await fs.promises.writeFile(this.#path,JSON.stringify(newProducts,null,2),"utf-8");
+                return "Elemento eliminado!"
             } catch (error) {
                 return error.message;
             }
     }
 
+    #_updateList(product,productlist){
+        const index = productlist.findIndex(element => element.id === product.id);
+        if(index === -1){
+           throw new Error("el producto no se encuentra");
+        } 
+        productlist.splice(index,1,product);
+        return productlist;
+    }
+
+
 }
-const updateList = (product,productlist)=>{
-    const index = productlist.findIndex(element => element.id === product.id);
-    if(index === -1){
-       throw new Error("el producto no se encuentra");
-    } 
-    productlist.splice(index,1,product);
-    return productlist;
-}
+
 
 const pathFile = "./Productos.json"
 const oreos = {
@@ -163,22 +170,21 @@ const productList=[
 const main = async ()=>{
     try {
         const galletitas = new ProductManager(pathFile);
-        console.log(await galletitas.loadData());
-        /*
+        console.log(await galletitas.getProducts());
         console.log(await galletitas.addProduct(productList[0]));
         console.log(await galletitas.addProduct(productList[1]));
         console.log(await galletitas.addProduct(productList[2]));
         console.log(await galletitas.getProducts());
-        console.log("Actualizando productos...\n");
+        console.log("El producto con id 1 es: ");
+        console.log(await galletitas.getProductById(1));
+        console.log(await galletitas.getProductById(4));
         console.log(await galletitas.update(1,oreos));
-        console.log(await galletitas.getProducts());
-        console.log("Borrando productos...\n");
+        console.log("Borrando producto...\n");
         console.log(await galletitas.delete(2));
         console.log(await galletitas.getProducts());
-        console.log("Agregando producto...\n");
-        console.log(await galletitas.addProduct(mana));
+        console.log("Agregando un nuevo producto....")
+        console.log(await galletitas.addProduct(productList[1]));
         console.log(await galletitas.getProducts());
-*/
     } catch (error) {
         console.log(error)
     }
