@@ -29,8 +29,10 @@ class ProductManager{
     async addProduct(product){
         try {
             const {title,description,price,thumbnail,code,stock} = product;
-
-            if(!title || !description || !price || !thumbnail || !code || !stock){
+            if(title === undefined || description === undefined || price === undefined || thumbnail === undefined || code=== undefined || stock=== undefined){
+                throw new Error("Todos los campos deben ser completados");
+            }
+            if(!title || !description || !price || !thumbnail || !code ){
                 throw new Error("Error, Todos los campos deben ser completados");
             }
             const productsFile = await this._loadData();
