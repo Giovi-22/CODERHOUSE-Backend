@@ -3,10 +3,12 @@ const fs = require('fs');
 class ProductManager{
     #autoID;
     #path;
+    #products;
 
     constructor(pathFile){
             this.#path = pathFile;
             this.#autoID = 1;
+            this.#products = [];
     } 
 
 
@@ -15,9 +17,7 @@ class ProductManager{
         try {
             const productsFile = await fs.promises.readFile(this.#path,"utf-8");
             const products = JSON.parse(productsFile);
-            if(products.length === 0){
-                return [];
-            }
+            this.#products = [...products];
             return products; 
         } catch (error) {
             console.log("El archivo no existe");
@@ -32,7 +32,7 @@ class ProductManager{
             if(title === undefined || description === undefined || price === undefined || thumbnail === undefined || code=== undefined || stock=== undefined){
                 throw new Error("Todos los campos deben ser completados");
             }
-            if(!title || !description || !price || !thumbnail || !code ){
+            if(!title.trim() || !description.trim() || !price || !thumbnail.trim() || !code.trim() ){
                 throw new Error("Error, Todos los campos deben ser completados");
             }
             const productsFile = await this._loadData();
@@ -54,9 +54,7 @@ class ProductManager{
     async getProducts(){
         try {
             const productsFile = await this._loadData();
-            if(productsFile.length === 0){
-                return [];
-            }
+            this.#products=[...productsFile];
             return productsFile;    
         } catch (error) {
            return error.message;
@@ -67,8 +65,9 @@ class ProductManager{
     async getProductById(productId){
         try {
             const productsFile = await this._loadData();
+            this.#products = [...productsFile];
             if(productsFile.length === 0){
-                return "La lista esta vacía";
+                throw new Error( "La lista esta vacía");
             }
             const product = productsFile.find(element => element.id === productId);
             if(!product){
@@ -82,20 +81,17 @@ class ProductManager{
     }
 
     async update(productId,product){
-        try {
-            const productsFile = await this._loadData();
-            if(productsFile.length === 0){
-                throw new Error("La lista esta vacía")
-            }
-            const exist = productsFile.find(element => element.id === productId);
-            if(!exist){
-                throw new Error(`El producto con id ${productId} no existe`);
-            }
-            const updatedList = this.#_updateList({...exist,...product},productsFile);
-            await fs.promises.writeFile(this.#path,JSON.stringify(updatedList,null,2),"utf-8");
-            return "Productos actualizados con éxito";
+            const productToUpdate= await this.getProductById(productId);
+            try {
+            const index = this.#products.findIndex(element => element.id === productId);
+            if(index === -1){
+                throw new Error("el producto no se encuentra");
+            } 
+            this.#products.splice(index,1,Object.assign(productToUpdate,product));
+            await fs.promises.writeFile(this.#path,JSON.stringify(this.#products,null,2),"utf-8");
+            return this.#products;
         } catch (error) {
-            return error.message;
+            return `No se puede actualizar el producto: ${error.message}`;
         }
     }
     async delete(productId){         
@@ -105,6 +101,7 @@ class ProductManager{
                     throw new Error("La lista esta vacía")
                 }
                 const newProducts  = productsFile.filter(element => element.id !== productId);
+                this.#products = [...newProducts];
                 await fs.promises.writeFile(this.#path,JSON.stringify(newProducts,null,2),"utf-8");
                 return "Elemento eliminado!"
             } catch (error) {
@@ -112,22 +109,12 @@ class ProductManager{
             }
     }
 
-    #_updateList(product,productlist){
-        const index = productlist.findIndex(element => element.id === product.id);
-        if(index === -1){
-           throw new Error("el producto no se encuentra");
-        } 
-        productlist.splice(index,1,product);
-        return productlist;
-    }
-
-
 }
 
 
 const pathFile = "./Productos.json"
 const oreos = {
-    title:"Oreos",
+    title:"oreos",
     description:"Galletitas rellenas con crema blanca",
     price:55,
     thumbnail:"con foto",
@@ -173,7 +160,7 @@ const main = async ()=>{
     try {
         const galletitas = new ProductManager(pathFile);
         console.log(await galletitas.getProducts());
-        console.log(await galletitas.addProduct(productList[0]));
+        console.log(await galletitas.addProduct(oreos));
         console.log(await galletitas.addProduct(productList[1]));
         console.log(await galletitas.addProduct(productList[2]));
         console.log(await galletitas.getProducts());
