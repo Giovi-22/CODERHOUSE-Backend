@@ -1,10 +1,9 @@
-import express, { urlencoded } from 'express';
-
+import express from 'express';
 import ProductManager from './ProductManager.js';
-import { productList } from '../Resources/products.js';
 
 const port = 8083;
 const app = express();
+
 app.use(express.urlencoded({extended:true}));
 
 const pathFile = './ProductsFile/Productos.json'
