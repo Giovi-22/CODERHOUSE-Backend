@@ -6,7 +6,7 @@ const app = express();
 
 app.use(express.urlencoded({extended:true}));
 
-const pathFile = './ProductsFile/Productos.json'
+const pathFile = './src/Productos.json'
 
 const pm = new ProductManager(pathFile);
 
@@ -24,22 +24,24 @@ app.get('/products',async (req,res)=>{
             res.send(products);
         }
     } catch (error) {
-        console.log(error);
-        res.send(error);
+        res.send({status:"error", error:error});
     }
         
 });
 
 app.get('/products/:pid',async (req,res)=>{
     const productId = +req.params.pid;
+    if (typeof productId !== "number" || isNaN(productId)) {
+        res.status(400).send({status:"error",error: "El parámetro id debe ser un número válido" });
+        return;
+      }
     try {
         const product = await pm.getProductById(productId);
         console.log(product);
         res.send(product);
 
     } catch (error) {
-        console.log(error);
-        res.send(error);
+        res.status(500).send({status:"error", error:error})
     }
         
 });
