@@ -47,7 +47,7 @@ class ProductManager{
             await fs.writeFile(this.#path,JSON.stringify(productsFile,null,2),"utf-8");
             return "Producto agregado con éxito!";
         } catch (error) {
-            return error.message; 
+            throw new Error (error.message);
         }
 
     }
@@ -57,7 +57,7 @@ class ProductManager{
             this.#products=[...productsFile];
             return productsFile;    
         } catch (error) {
-           return error.message;
+            throw new Error (error.message);
            
         }
         }
@@ -75,7 +75,7 @@ class ProductManager{
             }
             return product;
         } catch (error) {
-            return `Error: ${error.message}`;
+           throw new Error (error.message);
         }
 
     }
@@ -91,7 +91,7 @@ class ProductManager{
             await fs.writeFile(this.#path,JSON.stringify(this.#products,null,2),"utf-8");
             return this.#products;
         } catch (error) {
-            return `No se puede actualizar el producto: ${error.message}`;
+            throw new Error ( `No se puede actualizar el producto: ${error.message}`);
         }
     }
     async delete(productId){         
@@ -105,7 +105,7 @@ class ProductManager{
                 await fs.writeFile(this.#path,JSON.stringify(newProducts,null,2),"utf-8");
                 return "Elemento eliminado!"
             } catch (error) {
-                return error.message;
+                throw new Error (error.message);
             }
     }
 
