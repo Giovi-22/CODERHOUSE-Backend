@@ -1,0 +1,17 @@
+{
+  "name": "preentrega-1",
+  "version": "1.0.0",
+  "description": "Primera entrega del trabajo final del curso Backend Coderhouse",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "app": "node ./src/app.js"
+  },
+  "keywords": [],
+  "author": "Edgar Giovanni Barolin",
+  "type": "module",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.18.2"
+  }
+}
