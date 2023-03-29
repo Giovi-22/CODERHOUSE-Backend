@@ -6,26 +6,17 @@ const app = express();
 
 app.use(express.urlencoded({extended:true}));
 
-const pathFile = './src/Productos.json'
+const pathFile = './Productos.json'
 const pm = new ProductManager(pathFile);
 
 app.get('/products',async (req,res)=>{
-     let limit = Number(req.query.limit);
-     if (typeof limit !== "number" || isNaN(limit)) {
-        res.status(400).send({status:"error",error: "El parámetro id debe ser un número válido" });
-        return;
-      }
+     
     try {
         const products = await pm.getProducts();
-        if(limit){
-            const productList = products.slice(0,limit);
-            console.log(productList);
-            res.send(productList);
-            
-        }else{
-            console.log(products);
-            res.send(products);
-        }
+        const limit = Number(req.query.limit) || products.length;
+        const productList = products.slice(0,limit);
+        return res.status(200).send(productList);
+
     } catch (error) {
         res.send({status:"error", error:error.message});
     }
