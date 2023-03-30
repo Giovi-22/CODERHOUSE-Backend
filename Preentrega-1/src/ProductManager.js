@@ -28,8 +28,8 @@ class ProductManager{
     }
     async addProduct(product){
         try {
-            const {title,description,price,thumbnail,code,stock} = product;
-            if(title === undefined || description === undefined || price === undefined || thumbnail === undefined || code=== undefined || stock=== undefined){
+            const {title,description,price,thumbnail,code,stock,category,status} = product;
+            if(title === undefined || description === undefined || price === undefined || thumbnail === undefined || code=== undefined || stock=== undefined || category === undefined || status === undefined){
                 throw new Error("Todos los campos deben ser completados");
             }
             if(!title.trim() || !description.trim() || !price || !thumbnail.trim() || !code.trim() ){
@@ -89,7 +89,7 @@ class ProductManager{
             } 
             this.#products.splice(index,1,Object.assign(productToUpdate,product));
             await fs.writeFile(this.#path,JSON.stringify(this.#products,null,2),"utf-8");
-            return this.#products;
+            return `El producto con id ${productId} fue actualizado con exito.`;
         } catch (error) {
             throw new Error ( `No se puede actualizar el producto: ${error.message}`);
         }
