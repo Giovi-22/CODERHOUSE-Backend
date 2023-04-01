@@ -27,20 +27,7 @@ class CartManager{
         async create(){
             try {
                 await this._loadData();
-                if(this.#carts.length === 0){
-                    const newCart = {
-                        id:this.#cartID,
-                        products:[]
-                    }
-                    this.#carts.push(newCart);
-                }else{
-                    const lastID = this.#carts.at(-1).id;
-                    const newCart = {
-                        id:lastID + 1,
-                        products:[]
-                    }
-                    this.#carts.push(newCart);
-                }
+                this.#carts.length === 0 ? this.#carts.push({id:this.#cartID,products:[]}) : this.#carts.push({id:(this.#carts.at(-1).id)+1,products:[]});
                 await fs.writeFile(this.#path,JSON.stringify(this.#carts,null,2),"utf-8");
                 this.#cartID += 1;
                 return "Carrito creado"; 
@@ -48,27 +35,16 @@ class CartManager{
                 throw new Error(error.message);     
             }
         }
-    async add(cartId,productId,cuantity) {
+    async add(cartId,productId) {
             try {
-                const cartProducts = await this.get(cartId);
-                if(!cartProducts.length){
-                    const newProduct = {
-                        id: productId,
-                        cuantity: cuantity
-                    }
-                    console.log("pasa por aca")
-                    cartProducts.push(newProduct);
-                }else{
-                    const index = cartProducts.findIndex(element => element.id === productId);
-                    console.log("el indice es: ",index)
-                    index != -1 ? cartProducts[index].cuantity += cuantity : cartProducts.push({id:productId,cuantity:cuantity});
-                }
-                this.#carts.forEach(element => {
-                    if(element.id === cartId){
-                        element = {id:cartId,products:[...cartProducts]};
-                    }
-                });
+                const cartProducts = (await this.get(cartId)).products;
                 
+                const productIndex = cartProducts.findIndex(element => element.id === productId);
+                productIndex != -1 ? cartProducts[productIndex].cuantity += 1 : cartProducts.push({id:productId,cuantity:1});
+                
+                const cartIndex = this.#carts.findIndex(element => element.id === cartId);
+                Object.assign(this.#carts.at(cartIndex),{id:cartId,products:[...cartProducts]});
+
                 await fs.writeFile(this.#path,JSON.stringify(this.#carts,null,2),"utf-8");
                 return "Producto agregado";
             } catch (error) {
@@ -82,7 +58,7 @@ class CartManager{
             if(!cartFinded){
                 throw new Error("El carrito no existe");
             }
-            return cartFinded.products;
+            return cartFinded;
         } catch (error) {
             throw new Error(`No se pudo obtener el carrito. error: ${error.message}`);
         }

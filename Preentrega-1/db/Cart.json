@@ -1,10 +1,26 @@
 [
   {
+    "id": 1,
+    "products": []
+  },
+  {
     "id": 2,
     "products": [
       {
+        "id": 7,
+        "cuantity": 1
+      },
+      {
+        "id": 2,
+        "cuantity": 1
+      },
+      {
+        "id": 4,
+        "cuantity": 4
+      },
+      {
         "id": 1,
-        "cuantity": 6
+        "cuantity": 2
       }
     ]
   },
@@ -13,12 +29,16 @@
     "products": [
       {
         "id": 1,
-        "cuantity": 12
+        "cuantity": 2
+      },
+      {
+        "id": 5,
+        "cuantity": 1
+      },
+      {
+        "id": 13,
+        "cuantity": 1
       }
     ]
-  },
-  {
-    "id": 4,
-    "products": []
   }
 ]
