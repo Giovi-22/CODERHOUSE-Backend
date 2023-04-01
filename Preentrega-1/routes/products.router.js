@@ -1,8 +1,8 @@
 import { Router } from "express";
-import ProductManager from "../src/ProductManager.js";
+import ProductManager from "../controllers/ProductManager.js";
 import path from "path"
 
-const filePath = path.resolve("./src") + "/Products.json";
+const filePath = path.resolve("./db") + "/Products.json";
 const pm = new ProductManager(filePath);
 
 const routerProducts = Router();
@@ -53,6 +53,21 @@ routerProducts.put('/:pid',async (req,res)=>{
     }
     try{
         const result = await pm.update(productId,productUpdated);
+        res.status(201).send({status:"sucess", message:result})
+    }catch(error){
+        res.status(500).send({status:"error", error:error.message})
+    }      
+
+});
+
+routerProducts.delete('/:pid',async (req,res)=>{
+    const productId = Number(req.params.pid);
+    if(typeof productId !== "number" || isNaN(productId)){
+        res.status(400).send({status:"error",error: "El parámetro id debe ser un número válido" });
+        return;
+    }
+    try{
+        const result = await pm.delete(productId);
         res.status(201).send({status:"sucess", message:result})
     }catch(error){
         res.status(500).send({status:"error", error:error.message})

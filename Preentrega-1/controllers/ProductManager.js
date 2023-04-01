@@ -32,7 +32,7 @@ class ProductManager{
             if(title === undefined || description === undefined || price === undefined || thumbnail === undefined || code=== undefined || stock=== undefined || category === undefined || status === undefined){
                 throw new Error("Todos los campos deben ser completados");
             }
-            if(!title.trim() || !description.trim() || !price || !thumbnail.trim() || !code.trim() ){
+            if(!title.trim() || !description.trim() || !price || !code.trim() ){
                 throw new Error("Error, Todos los campos deben ser completados");
             }
             const productsFile = await this._loadData();
@@ -99,6 +99,11 @@ class ProductManager{
                 const productsFile = await this._loadData();
                 if(productsFile.length === 0){
                     throw new Error("La lista esta vacía")
+                }
+                const exist = productsFile.find(element => element.id === productId);
+                console.log("el valor de exist es: ",exist)
+                if(!exist){
+                    throw new Error(`El producto con id ${productId} no se encuentra en la base de datos.`);
                 }
                 const newProducts  = productsFile.filter(element => element.id !== productId);
                 this.#products = [...newProducts];
