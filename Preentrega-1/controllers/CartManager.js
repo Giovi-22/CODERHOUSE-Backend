@@ -18,41 +18,34 @@ class CartManager{
                 this.#carts = [...products];
                 return "datos cargados";
             } catch (error) {
-                console.log("El carrito no existe \nCreando...");
-                const newCart = [{
-                    id:this.#cartID,
-                    products:[]
-                }];
-                await fs.writeFile(this.#path,JSON.stringify(newCart,null,2),"utf-8");
-                this.#carts.push(newCart);
+                console.log("El carrito no existe \nCreando archivo...");
+                await fs.writeFile(this.#path,JSON.stringify([],null,2),"utf-8");
                 return "Carrito creado con éxito!";      
-                /*await this.create();
-                return this.#carts;*/
             }
         }
 
         async create(){
             try {
-                const cartFile = await fs.readFile(this.#path,{encoding:"utf-8"});
-                this.#carts = JSON.parse(cartFile);
-                const lastID = this.#carts.at(-1).id;
-                const newCart = {
-                    id:lastID + 1,
-                    products:[]
+                await this._loadData();
+                if(this.#carts.length === 0){
+                    const newCart = {
+                        id:this.#cartID,
+                        products:[]
+                    }
+                    this.#carts.push(newCart);
+                }else{
+                    const lastID = this.#carts.at(-1).id;
+                    const newCart = {
+                        id:lastID + 1,
+                        products:[]
+                    }
+                    this.#carts.push(newCart);
                 }
-                this.#carts.push(newCart);
                 await fs.writeFile(this.#path,JSON.stringify(this.#carts,null,2),"utf-8");
                 this.#cartID += 1;
-                return "Carrito creado con éxito!"; 
+                return "Carrito creado"; 
             } catch (error) {
-                console.log("El carrito no existe \nCreando...");
-                const newCart = [{
-                    id:this.#cartID,
-                    products:[]
-                }];
-                await fs.writeFile(this.#path,JSON.stringify(newCart,null,2),"utf-8");
-                this.#carts.push(newCart);
-                return "Carrito creado con éxito!";      
+                throw new Error(error.message);     
             }
         }
     async add(cartId,productId,cuantity) {
