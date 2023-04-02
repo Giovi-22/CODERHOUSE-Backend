@@ -10,26 +10,26 @@ const routerProducts = Router();
 routerProducts.get('/',async(req,res)=>{
     try {
         const products = await pm.getProducts();
-        const limit = Number(req.query.limit) || products.length;
+        const limit = +req.query.limit || products.length;
         const productList = products.slice(0,limit);
-        return res.status(200).json({status:'success',message:productList});
+        return res.status(200).json({status:'success',data:productList});
     } catch (error) {
-        res.status(500).send({status:"error",error:"No se pueden obtener los productos, error en el servidor"})
+        res.status(500).json({status:"error",error:"No se pueden obtener los productos, error en el servidor"})
     }  
 })
 
 routerProducts.get('/:pid',async (req,res)=>{
-    const productId = Number(req.params.pid);
+    const productId = +eq.params.pid;
     if (typeof productId !== "number" || isNaN(productId)) {
-        res.status(400).send({status:"error",error: "El parámetro id debe ser un número válido" });
+        res.status(400).json({status:"error",error: "El parámetro id debe ser un número válido" });
         return;
       }
     try {
         const product = await pm.getProductById(productId);
-        res.send(product);
+        res.status(200).json(product);
     } catch (error) {
         console.log(error.message);
-        res.send({status:"error", error:error.message})
+        res.json({status:"error", error:error.message})
     }
         
 });
@@ -38,9 +38,9 @@ routerProducts.post('/',async (req,res)=>{
     const newProduct = req.body;
     try{
         const result = await pm.addProduct(newProduct);
-        res.status(201).send({status:"sucess", message:result})
+        res.status(201).json({status:"sucess", data:result})
     }catch(error){
-        res.status(500).send({status:"error", error:error.message})
+        res.status(500).json({status:"error", error:error.message})
     }        
 });
 
@@ -48,14 +48,14 @@ routerProducts.put('/:pid',async (req,res)=>{
     const productId = Number(req.params.pid);
     const productUpdated = req.body;
     if(typeof productId !== "number" || isNaN(productId)){
-        res.status(400).send({status:"error",error: "El parámetro id debe ser un número válido" });
+        res.status(400).json({status:"error",error: "El parámetro id debe ser un número válido" });
         return;
     }
     try{
         const result = await pm.update(productId,productUpdated);
-        res.status(201).send({status:"sucess", message:result})
+        res.status(201).json({status:"sucess", data:result})
     }catch(error){
-        res.status(500).send({status:"error", error:error.message})
+        res.status(500).json({status:"error", error:error.message})
     }      
 
 });
@@ -63,14 +63,14 @@ routerProducts.put('/:pid',async (req,res)=>{
 routerProducts.delete('/:pid',async (req,res)=>{
     const productId = Number(req.params.pid);
     if(typeof productId !== "number" || isNaN(productId)){
-        res.status(400).send({status:"error",error: "El parámetro id debe ser un número válido" });
+        res.status(400).json({status:"error",error: "El parámetro id debe ser un número válido" });
         return;
     }
     try{
         const result = await pm.delete(productId);
-        res.status(201).send({status:"sucess", message:result})
+        res.status(200).json({status:"sucess", data:result})
     }catch(error){
-        res.status(500).send({status:"error", error:error.message})
+        res.status(500).json({status:"error", error:error.message})
     }      
 
 });

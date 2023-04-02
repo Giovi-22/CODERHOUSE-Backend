@@ -14,8 +14,11 @@ class CartManager{
         async _loadData(){
             try {
                 const cartFile = await fs.readFile(this.#path,{encoding:"utf-8"});
-                const products = JSON.parse(cartFile);
-                this.#carts = [...products];
+                const cart = JSON.parse(cartFile);
+                if(cart.length){
+                    this.#cartID = cart.at(-1).id + 1;
+                }
+                this.#carts = [...cart];
                 return "datos cargados";
             } catch (error) {
                 console.log("El carrito no existe \nCreando archivo...");
@@ -27,9 +30,8 @@ class CartManager{
         async create(){
             try {
                 await this._loadData();
-                this.#carts.length === 0 ? this.#carts.push({id:this.#cartID,products:[]}) : this.#carts.push({id:(this.#carts.at(-1).id)+1,products:[]});
+                this.#carts.push({id:this.#cartID,products:[]});
                 await fs.writeFile(this.#path,JSON.stringify(this.#carts,null,2),"utf-8");
-                this.#cartID += 1;
                 return "Carrito creado"; 
             } catch (error) {
                 throw new Error(error.message);     
@@ -58,9 +60,9 @@ class CartManager{
             if(!cartFinded){
                 throw new Error("El carrito no existe");
             }
-            return cartFinded;
+            return {error:false,data:cartFinded};
         } catch (error) {
-            throw new Error(`No se pudo obtener el carrito. error: ${error.message}`);
+            return {error:true,message:`No se pudo obtener el carrito. error: ${error.message}`};
         }
     }
 

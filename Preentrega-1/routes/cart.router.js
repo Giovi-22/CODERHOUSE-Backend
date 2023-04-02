@@ -10,7 +10,7 @@ const cm = new CartManager(path.resolve("./db") + "/Cart.json")
 cartRouter.post('/',async (req,res)=>{
         try {
             const result = await cm.create();
-            res.status(201).send({status:"sucess", message:result})
+            res.status(201).send({status:"sucess", data:result})
         } catch (error) {
             res.status(500).json({status:"error", error:error.message})
         }
@@ -26,7 +26,7 @@ cartRouter.post('/:cid/product/:pid',async (req,res)=>{
         try {
             await pm.getProductById(productId);
             const result = await cm.add(cartId,productId);
-            res.status(201).send({status:"sucess", message:result})
+            res.status(200).send({status:"sucess", data:result})
         } catch (error) {
             res.status(500).json({status:"error", error:error.message})
         }
@@ -40,7 +40,11 @@ cartRouter.get('/:cid',async (req,res)=>{
           }
         try {
             const result = await cm.get(cartId);
-            res.status(201).send({status:"sucess", message:{cartId:cartId,products:result.products}})
+            if(result.error){
+                res.status(400).json({status:"error",error:result.message});
+                return;
+            }
+            res.status(200).send({status:"sucess", data:result.data.products})
         } catch (error) {
             res.status(500).json({status:"error", error:error.message})
         }
