@@ -24,9 +24,17 @@ cartRouter.post('/:cid/product/:pid',async (req,res)=>{
             return;
           }
         try {
-            await pm.getProductById(productId);
+            const product = await pm.getProductById(productId);
+            if(product.error){
+                res.status(400).json({status:"error",error:product.message});
+                return;
+            }
             const result = await cm.add(cartId,productId);
-            res.status(200).send({status:"sucess", data:result})
+            if(result.error){
+                res.status(400).json({status:"error",error:result.message});
+                return;
+            }
+            res.status(201).send({status:"sucess", data:result.data})
         } catch (error) {
             res.status(500).json({status:"error", error:error.message})
         }

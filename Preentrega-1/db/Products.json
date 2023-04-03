@@ -124,7 +124,11 @@
     "title": "Cortante Barco velero",
     "description": "Incluye dos unidades,cortante y marcador. Tamaño a elección",
     "price": 475,
-    "thumbnail": [],
+    "thumbnail": [
+      "url/foto1",
+      "url/foto2",
+      "url/foto3"
+    ],
     "code": "CB6",
     "stock": 23,
     "status": true,
