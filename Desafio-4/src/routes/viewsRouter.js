@@ -1,10 +1,32 @@
 import { Router } from "express";
+import path from "path";
+import ProductManager from "../controllers/ProductManager.js"
 
 const viewsRouter = Router();
+const pathFile = path.resolve('./src/db/Products.json');
+const pm = new ProductManager(pathFile);
 
 
-viewsRouter.get('/',(req,res)=>{
-    res.render('index',{saludo:'Giovanni'})
-})
+viewsRouter.get('/',async(req,res)=>{
+    try {
+        const result = await pm.getProducts();
+        res.status(201).render('home',{data:result});
+    } catch (error) {
+        console.log(error.message)
+        res.status(500).json({status:"error",message:error.message});
+    }
+});
+
+viewsRouter.get('/realtimeproducts',async(req,res)=>{
+    try {
+        const result = await pm.getProducts();
+        res.status(201).render('realTimeProducts',{data:result});
+    } catch (error) {
+        console.log(error.message)
+        res.status(500).json({status:"error",message:error.message});
+    }
+});
+
+
 
 export default viewsRouter;
