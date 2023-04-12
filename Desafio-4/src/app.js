@@ -12,7 +12,7 @@ const port = 8083;
 const httpServer = app.listen(port,()=>console.log(`Servidor escuchando en el puerto ${port}`));
 const socketServer = new Server(httpServer);
 
-const pm = new ProductManager(path.resolve('./src/db/Products.json'))
+const pm = new ProductManager(path.resolve('./src/db/Products.json'));
 app.set('views',path.resolve('./src/views'));
 app.set('view engine','ejs');
 app.use(express.json());
@@ -23,14 +23,11 @@ app.use('/',viewsRouter);
 
 socketServer.on('connection',async(socket)=>{
     console.log(`Nuevo cliente conectado, id: ${socket.id}`);
+
     socket.on('disconnecting',()=>{
         console.log(`cliente ${socket.id} desconectado`);
     })
-    socket.on('products',async()=>{
-        const products = await pm.getProducts();
-        const compiled = ejs.render(template,{data:products})
-        socket.emit('productsDiv',compiled);
-    })
+
     socket.on('delete',async (productID)=>{
         try {
             if(isNaN(+productID)){
@@ -62,8 +59,4 @@ socketServer.on('connection',async(socket)=>{
         }
         
     })
-socketServer.on('disconnecting',()=>{
-    console.log("cliente desconectado")
-})
-
 })
