@@ -14,13 +14,15 @@ class ProductController{
     }
 
     static getProducts = async (req,res,next)=>{
-        const limit = +req.query.limit || 10;
-        const page = +req.query.page || 1;
-        const sort = +req.query.sort || null;
-        const filter = req.query.type || null;
+        const options = {
+            limit: +req.query.limit || 10,
+            page: +req.query.page || 1,
+            sort: +req.query.sort || null, //los valores que recibe para ordenar por precio pueden ser 1 (de menor a mayor) y -1 (de mayor a menor)
+            filter:JSON.parse(`{${req.query.filter || ""}}`)
+        }
         try {
             const pManager = new ProductManager();
-            const products = await pManager.get(limit,page.sort,filter);
+            const products = await pManager.get(options);
             res.status(200).json({status:'success',data:products});
         } catch (error) {
             next({statusCode:error.cause?.statusCode ?? 500, message:error.message});

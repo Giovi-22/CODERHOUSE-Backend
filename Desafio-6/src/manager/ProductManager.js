@@ -22,9 +22,9 @@ class ProductManager{
         }
         
     }
-    async get(limit){
+    async get(options){
         try {
-            const products = await this.#productManagerDAO.find(limit);
+            const products = await this.#productManagerDAO.Paginate(options);
             return products;
         } catch (error) {
             throw new Error(error.message,{cause:error.cause?.statusCode && 500});

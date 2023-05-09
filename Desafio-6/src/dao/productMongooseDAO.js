@@ -39,6 +39,22 @@ class ProductMongooseDAO{
             
         }
     }
+    async Paginate({limit,page,sort,filter}){
+        try {
+            const options = {
+                limit: limit,
+                page: page,
+                sort: sort ? {'price':sort,'_id':1} : null,
+            }
+            //Model.paginate([query],[options],[callback])
+            const result = await productModel.paginate(filter,options);
+            console.log(result)
+            return[];
+        } catch (error) {
+            console.log(error);
+        }
+
+    }
     async find(limit){
         try {
             const products = await productModel.find().limit(limit);
