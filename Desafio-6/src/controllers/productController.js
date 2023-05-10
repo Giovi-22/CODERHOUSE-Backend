@@ -17,13 +17,13 @@ class ProductController{
         const options = {
             limit: +req.query.limit || 10,
             page: +req.query.page || 1,
-            sort: +req.query.sort || null, //los valores que recibe para ordenar por precio pueden ser 1 (de menor a mayor) y -1 (de mayor a menor)
-            filter:JSON.parse(`{${req.query.filter || ""}}`)
+            sort: +req.query.sort || "", //los valores que recibe para ordenar por precio pueden ser 1 (de menor a mayor) y -1 (de mayor a menor)
+            filter:JSON.parse(`{${req.query.filter || ""}}`) //filter se pasa por query de la siguiente forma: "productField":"value"
         }
         try {
             const pManager = new ProductManager();
             const products = await pManager.get(options);
-            res.status(200).json({status:'success',data:products});
+            res.status(200).json({status:'success',payload:products.docs,...products,docs:undefined});
         } catch (error) {
             next({statusCode:error.cause?.statusCode ?? 500, message:error.message});
             return;
@@ -47,7 +47,7 @@ class ProductController{
         const data = req.body;
         try {
             const pManager = new ProductManager();
-            const productUpdated = await pManager.updateOne(pid,data);
+            const productUpdated = await pManager.update(pid,data);
             res.status(200).json({status:'success',data:productUpdated});
         } catch (error) {
             next({statusCode:error.cause?.statusCode ?? 500, message:error.message});

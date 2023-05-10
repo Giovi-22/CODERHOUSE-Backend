@@ -17,24 +17,22 @@ class CartManager{
     }
     async addOne(cid,pid) {
         try {
-            const cart = await this.#cartMongooseDAO.findById(cid);
+            const cart = await this.getOne(cid);
             const index = cart.products.findIndex(product => product.pid.toString() === pid);
             if(index === -1){
                 cart.products.push({pid:pid,quantity:1});
-                const updatedCart = await this.#cartMongooseDAO.updateOne(cart.id,cart.products);
-                return updatedCart;
+                return this.#cartMongooseDAO.update(cart.id,cart.products);
+
             }
             Object.assign(cart.products.at(index),{quantity: (cart.products[index].quantity) + 1});
-            const updatedCart = await this.#cartMongooseDAO.updateOne(cart.id,cart.products);
-            return updatedCart;
+            return this.#cartMongooseDAO.update(cart.id,cart.products);
         } catch (error) {
             throw new Error(error.message);
         }
     }
     async getAll(){
         try {
-            const carts = this.#cartMongooseDAO.find({status:{$ne:false}});
-            
+            const carts = this.#cartMongooseDAO.find();
             return carts;
         } catch (error) {
             throw new Error(error.message);
@@ -49,26 +47,38 @@ class CartManager{
             throw new Error(error.message);
         }
     }
-    async getWhitFilters(cid,pid){
+    async updateAll(cid,data){
         try {
-            const result = this.#cartMongooseDAO.find({products: {$elemMatch:{pid:pid}}});    
+            return this.#cartMongooseDAO.update(cid,data);
         } catch (error) {
-            
-        }
-    }
-    async getMany(cid,data){
-        try {
-            const carts = this.#cartMongooseDAO.findAndModify(cid,data);
-            
-        } catch (error) {
-            
+            throw new Error(error.message);
         }
     }
 
-    async deleteOne(cid){
+    async updateOne(cid,pid,quantity=1){
         try {
-            const cart = this.#cartMongooseDAO.updateOne(cid,{status:false});
-            return cart;
+            const cart = await this.getOne(cid);
+            const index = cart.products.findIndex(product => product.pid.toString() === pid);
+            Object.assign(cart.products.at(index),{quantity:quantity});
+            return this.#cartMongooseDAO.update(cid,cart.products);
+        } catch (error) {
+            throw new Error(error.message);
+        }
+    }
+
+    async deleteOne(cid,pid){
+        try {
+            const result = await this.getOne(cid);
+            const cartUpdated = result.products.filter(product=>product.pid.toString() !== pid);
+            return this.#cartMongooseDAO.update(result.id,cartUpdated); //arreglo de objetos
+        } catch (error) {
+            throw new Error(error.message);
+        }
+    }
+
+    async deleteAll(cid){
+        try {
+            return this.#cartMongooseDAO.deletAll(cid);
         } catch (error) {
             throw new Error(error.message);
         }

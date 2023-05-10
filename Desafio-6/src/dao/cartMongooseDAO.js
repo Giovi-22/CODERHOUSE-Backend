@@ -1,5 +1,5 @@
 import { cartModel } from "../models/cartModel.js"
-import  mongoose  from "mongoose";
+
 
 class CartMongooseDAO{
 
@@ -9,79 +9,68 @@ class CartMongooseDAO{
             return {
                 id: cart._id.toString(),
                 products: cart.products,
-                status:cart.status
             }
         } catch (error) {
             throw new Error(error.message);
         }
     }
 
-    async updateOne(cid,data){
+    async update(cid,data){
         try {
             const cart = await cartModel.findOneAndUpdate({_id:cid},{$set:{products :data}},{new:true})
-            console.log("El carrito en mongoose",cart);
             return {
                 id:(cart._id).toString(),
-                products:cart.products,
+                products:cart.products.map(product =>({pid:product.pid,quantity:product.quantity}))
             };
-        } catch (error) {
-            throw new Error(error.message);
-        }
-    }
-    
-    async updateAgregate(cid,pid){
-        try {
-            console.log("updateAgregate")
-            const cart = await cartModel.aggregate([
-                {
-                    $match:{_id: new mongoose.Types.ObjectId(cid)}
-                },
-                {
-                  $match: {products: {$elemMatch:{pid: {$eq:new mongoose.Types.ObjectId(pid)}}}}
-                }
-            ])
-            console.log("agreggate: ",cart);
-        } catch (error) {
-            console.log(error);
-        }
-    }
-    
-    async find(filter){
-        try {
-            const carts = await cartModel.find(filter);
-            console.log(carts)
-            /*
-            return carts.map(cart=>({
-                id:cart._id,
-                products:cart.products,
-                status:cart.status
-            }));
-            */
         } catch (error) {
             throw new Error(error.message);
         }
     }
 
+    async find(){
+        try {
+            const carts = await cartModel.find({});
+            if(!carts.length){
+                throw new Error("No existen carritos en la base de datos");
+            }
+            return carts.map(cart=>({
+                id:cart.id.toString(),
+                products: cart.products.map(product =>({pid:product.pid,quantity:product.quantity})),
+            }))
+        } catch (error) {
+            throw new Error(error.message);
+        }
+    }  
+    
     async findById(cid){
         try {
-            const cart = await cartModel.findById(cid);
+            const cart = await cartModel.findById(cid).populate("products.pid");
             return {
                 id:(cart._id).toString(),
-                products:cart.products,
+                products: cart.products.map(product => ({
+                    product:{
+                        id:product.pid.id,
+                        title:product.pid.title,
+                        description: product.pid.description,
+                        category: product.pid.category,
+                        price: product.pid.price,
+                        thumbnail: product.pid.thumbnail,
+                        stock: product.pid.stock,
+                        code:product.pid.code,
+                        status: product.pid.status
+                    },
+                    quantity: product.quantity,
+                })),
+                    
             };
         } catch (error) {
             throw new Error(error.message);
         }
     }
-    async findAndModify(cid,data){
+
+    async deletAll(cid){
         try {
-            const cart = await cartModel.findOne({_id:cid},{products:{$elemMatch:{$eq:data._id}}});
-            console.log(cart)
-            /*return {
-                id:cart._id,
-                products:cart.products,
-                status:cart.status
-            };*/
+            return this.update(cid,[]);
         } catch (error) {
             throw new Error(error.message);
         }

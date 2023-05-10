@@ -15,26 +15,35 @@ class CartController{
 
     static addOne = async (req,res,next)=>{
         const {cid,pid} = req.params;
-        console.log(cid,pid)
         try {
             const cartM = new CartManager();
             const newCart =  await cartM.addOne(cid,pid);
-            console.log("en el controller: ",newCart)
             return res.status(200).json({status:"success",data:newCart});
         } catch (error) {
             next({statusCode:error.cause?.statusCode ?? 500, message:error.message});
         }
     }
-
+    
     static updateCart = async (req,res,next)=>{
         const cid = req.params.cid;
         const data = req.body;
         try {
-
             const cartM = new CartManager();
-            const update =  cartM.getMany(cid,data);
-            //const updatedCart = await cartM.addOne(cid,data);
-            //res.status(200).json({status:"success",data:updatedCart});
+            const updatedCart = await cartM.updateAll(cid,data);
+            res.status(200).json({status:"success",data:updatedCart});
+        } catch (error) {
+            next({statusCode:error.cause?.statusCode ?? 500, message:error.message});
+            return;
+        }
+    }
+
+    static updateOne = async (req,res,next)=>{
+        const {cid,pid} = req.params;
+        const data = req.body;      
+        try {
+            const cartM = new CartManager();
+            const updatedCart = await cartM.updateOne(cid,pid,data.quantity);
+            res.status(200).json({status:"success",data:updatedCart});
         } catch (error) {
             next({statusCode:error.cause?.statusCode ?? 500, message:error.message});
             return;
@@ -53,10 +62,9 @@ class CartController{
 
     static get = async (req,res,next)=>{
         const cid = req.params.cid;
-        const pid = req.params.pid;
         try {
             const cartM = new CartManager();
-            const cart = await cartM.getWhitFilters(cid,pid);
+            const cart = await cartM.getOne(cid);
             res.status(200).json({status:"success",data:cart});
         } catch (error) {
             next({statusCode:error.cause?.statusCode ?? 500, message:error.message});
@@ -64,12 +72,24 @@ class CartController{
         }
     }
 
-    static delete = async (req,res,next)=>{
+    static deleteAll = async (req,res,next)=>{
         const cid = req.params.cid;
         try {
             const cartM = new CartManager();
-            const cartDeleted = await cartM.deleteOne(cid);
-            res.status(200).json({status:"success",data:cartDeleted});
+            const result = await cartM.deleteAll(cid);
+            res.status(200).json({status:"success",data:result});
+        } catch (error) {
+            next({statusCode:error.cause?.statusCode ?? 500, message:error.message});
+            return;
+        }
+    }
+
+    static deleteOne = async (req,res,next)=>{
+        const {cid,pid} = req.params;
+        try {
+            const cartM = new CartManager();
+            const result = await cartM.deleteOne(cid,pid);
+            res.status(200).json({status:"success",data:result});
         } catch (error) {
             next({statusCode:error.cause?.statusCode ?? 500, message:error.message});
             return;

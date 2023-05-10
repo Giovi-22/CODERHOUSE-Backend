@@ -10,7 +10,6 @@ class ProductManager{
         try {
             
             const codeExist = await this.#productManagerDAO.findByFilter({code:{$eq:product.code}});
-            console.log(codeExist)
             if(codeExist.length){
                 throw new Error("El código del producto ya existe",{cause:{statusCode:400}});
             }
@@ -31,16 +30,6 @@ class ProductManager{
         }
     }
 
-    async getMany(limit){
-        try {
-            const products = await this.#productManagerDAO.findTo(limit);
-            return products;
-        } catch (error) {
-            throw new Error(error.message,{cause:error.cause?.statusCode && 500});
-        }
-        
-    }
-    
     async getOne(pid){
         try {
             const product = await this.#productManagerDAO.findById(pid);
@@ -50,9 +39,10 @@ class ProductManager{
         }
         
     }
-    async updateOne(pid,data){
+
+    async update(pid,data){
         try {
-            const updatedProduct = await this.#productManagerDAO.updateOne(pid,data);
+            const updatedProduct = await this.#productManagerDAO.update(pid,data);
             return updatedProduct;
         } catch (error) {
             throw new Error(error.message,{cause:error.cause?.statusCode && 500}); 
@@ -61,7 +51,7 @@ class ProductManager{
     }
     async deleteOne(pid){
         try {
-            const productDeleted = await this.#productManagerDAO.updateOne(pid,{status:false});
+            const productDeleted = await this.update(pid,{status:false});
             return productDeleted;
         } catch (error) {
             throw new Error(error.message,{cause:error.cause?.statusCode && 500}); 

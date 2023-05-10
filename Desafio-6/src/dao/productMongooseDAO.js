@@ -31,69 +31,58 @@ class ProductMongooseDAO{
         }
         
     }
-    async findAndInsert(product){
-        try {
-            const products = await productModel.find({code:{$eq:product.code}})
-            return products;
-        } catch (error) {
-            
-        }
-    }
+
     async Paginate({limit,page,sort,filter}){
         try {
             const options = {
                 limit: limit,
                 page: page,
-                sort: sort ? {'price':sort,'_id':1} : null,
+                sort:{'price':sort,'_id':1}, //condicion requerida en la entrega
             }
             //Model.paginate([query],[options],[callback])
             const result = await productModel.paginate(filter,options);
-            console.log(result)
-            return[];
+            Object.assign(result,
+                {docs: result.docs.map(product => ({
+                    id: product._id.toString(),
+                    title: product.title,
+                    description: product.description,
+                    category: product.category,
+                    price: product.price,
+                    stock: product.stock,
+                    thumbnail: product.thumbnail,
+                    code: product.code,
+                    status: product.status
+                })),
+
+                
+            });
+            return result;
         } catch (error) {
             console.log(error);
         }
 
     }
-    async find(limit){
-        try {
-            const products = await productModel.find().limit(limit);
-            return  products.map(product =>({
-                        id: product._id,
-                        title: product.title,
-                        description: product.description,
-                        price: product.price,
-                        thumbnail: product.thumbnail,
-                        stock: product.stock,
-                        code: product.code,
-                        status: product.status,
-                        category: product.category
-                    }))
-        } catch (error) {
-            throw new Error(error.message);
-        }    
-    }
     
     async findById(pid){
         try {
             const product = await productModel.findById(pid);
-            return {
-                id: product._id,
+           return {
+                id: (product._id).toString(),
                 title: product.title,
                 description: product.description,
+                category: product.category,
                 price: product.price,
                 thumbnail: product.thumbnail,
                 stock: product.stock,
                 code: product.code,
-                status: product.status,
-                category: product.category
+                status: product.status   
             }
         } catch (error) {
             throw new Error(error.message);
         }
     }
 
-    async updateOne(pid,data){
+    async update(pid,data){
         try {
             const productUpdated = await productModel.findOneAndUpdate({_id:pid},data,{new:true});
             return {
@@ -111,26 +100,6 @@ class ProductMongooseDAO{
         } catch (error) {
             throw new Error(error.message);
         }
-    }
-
-    async deleteOne(pid){
-        try {
-            const productDeleted = await productModel.findOneAndDelete({_id:pid});
-            return {
-                id: productDeleted._id,
-                title: productDeleted.title,
-                description: productDeleted.description,
-                price: productDeleted.price,
-                thumbnail: productDeleted.thumbnail,
-                stock: productDeleted.stock,
-                code: productDeleted.code,
-                status: productDeleted.status,
-                category: productDeleted.category
-            }  
-        } catch (error) {
-            throw new Error(error.message);
-        }
-        
     }
 }
 
