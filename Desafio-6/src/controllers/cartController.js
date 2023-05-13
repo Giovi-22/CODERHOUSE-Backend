@@ -8,7 +8,7 @@ class CartController{
             const newCart = await cartM.createCart({products:[]});
             res.status(201).json({status:"success",data:newCart});
         } catch (error) {
-            next({statusCode:error.cause?.statusCode ?? 500, message:error.message});
+            next({statusCode:error.cause || 500, message:error.message});
             return;
         }
     }
@@ -20,7 +20,7 @@ class CartController{
             const newCart =  await cartM.addOne(cid,pid);
             return res.status(200).json({status:"success",data:newCart});
         } catch (error) {
-            next({statusCode:error.cause?.statusCode ?? 500, message:error.message});
+            next({statusCode:error.cause || 500, message:error.message});
         }
     }
     
@@ -32,7 +32,7 @@ class CartController{
             const updatedCart = await cartM.updateAll(cid,data);
             res.status(200).json({status:"success",data:updatedCart});
         } catch (error) {
-            next({statusCode:error.cause?.statusCode ?? 500, message:error.message});
+            next({statusCode:error.cause || 500, message:error.message});
             return;
         }
     }
@@ -45,7 +45,7 @@ class CartController{
             const updatedCart = await cartM.updateOne(cid,pid,data.quantity);
             res.status(200).json({status:"success",data:updatedCart});
         } catch (error) {
-            next({statusCode:error.cause?.statusCode ?? 500, message:error.message});
+            next({statusCode:error.cause || 500, message:error.message});
             return;
         }
     }
@@ -55,7 +55,7 @@ class CartController{
             const carts = await cartM.getAll();
             res.status(200).json({status:"success",data:carts});
         } catch (error) {
-            next({statusCode:error.cause?.statusCode ?? 500, message:error.message});
+            next({statusCode:error.cause || 500, message:error.message});
             return;
         }
     }
@@ -67,7 +67,7 @@ class CartController{
             const cart = await cartM.getOne(cid);
             res.status(200).json({status:"success",data:cart});
         } catch (error) {
-            next({statusCode:error.cause?.statusCode ?? 500, message:error.message});
+            next({statusCode:error.cause || 500, message:error.message});
             return;
         }
     }
@@ -79,7 +79,7 @@ class CartController{
             const result = await cartM.deleteAll(cid);
             res.status(200).json({status:"success",data:result});
         } catch (error) {
-            next({statusCode:error.cause?.statusCode ?? 500, message:error.message});
+            next({statusCode:error.cause || 500, message:error.message});
             return;
         }
     }
@@ -91,7 +91,7 @@ class CartController{
             const result = await cartM.deleteOne(cid,pid);
             res.status(200).json({status:"success",data:result});
         } catch (error) {
-            next({statusCode:error.cause?.statusCode ?? 500, message:error.message});
+            next({statusCode:error.cause || 500, message:error.message});
             return;
         }
     }
