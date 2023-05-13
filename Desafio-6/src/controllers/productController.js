@@ -8,7 +8,7 @@ class ProductController{
                 const newProduct = await pManager.add(product);
                 res.status(201).json({status:'success',data:newProduct});
             } catch (error) {
-                next({statusCode:error.cause?.statusCode ?? 500, message:error.message});
+                next({statusCode:error.cause || 500, message:error.message});
                 return;
             }
     }
@@ -25,7 +25,7 @@ class ProductController{
             const products = await pManager.get(options);
             res.status(200).json({status:'success',payload:products.docs,...products,docs:undefined});
         } catch (error) {
-            next({statusCode:error.cause?.statusCode ?? 500, message:error.message});
+            next({statusCode:error.cause || 500, message:error.message});
             return;
         }
     }
@@ -37,7 +37,7 @@ class ProductController{
             const product = await pManager.getOne(pid);
             res.status(200).json({status:'success',data:product});
         } catch (error) {
-            next({statusCode:error.cause?.statusCode ?? 500, message:error.message});
+            next({statusCode:error.cause || 500, message:error.message});
         }
     }
 
@@ -50,7 +50,7 @@ class ProductController{
             const productUpdated = await pManager.update(pid,data);
             res.status(200).json({status:'success',data:productUpdated});
         } catch (error) {
-            next({statusCode:error.cause?.statusCode ?? 500, message:error.message});
+            next({statusCode:error.cause || 500, message:error.message});
             return;
         }
     }
@@ -62,7 +62,7 @@ class ProductController{
             const productDeleted = await pManager.deleteOne(pid);
             res.status(200).json({status:'success',data:productDeleted});
         } catch (error) {
-            next({statusCode:error.cause?.statusCode ?? 500, message:error.message});
+            next({statusCode:error.cause || 500, message:error.message});
             return;
         }
     }

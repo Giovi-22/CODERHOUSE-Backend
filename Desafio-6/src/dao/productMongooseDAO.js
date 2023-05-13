@@ -18,7 +18,7 @@ class ProductMongooseDAO{
         }
             
         } catch (error) {
-          throw new Error(error.message);
+            throw new Error(error.message,{cause:error.cause || 500});
         }
         
     }
@@ -27,7 +27,7 @@ class ProductMongooseDAO{
             const products = await productModel.find(filter);
             return products;
         } catch (error) {
-            throw new Error(error.message);
+            throw new Error(error.message,{cause:error.cause || 500});
         }
         
     }
@@ -58,7 +58,7 @@ class ProductMongooseDAO{
             });
             return result;
         } catch (error) {
-            console.log(error);
+            throw new Error(error.message,{cause:error.cause || 500});
         }
 
     }
@@ -78,7 +78,7 @@ class ProductMongooseDAO{
                 status: product.status   
             }
         } catch (error) {
-            throw new Error(error.message);
+            throw new Error(error.message,{cause:error.cause || 500});
         }
     }
 
@@ -98,7 +98,7 @@ class ProductMongooseDAO{
             }
             
         } catch (error) {
-            throw new Error(error.message);
+            throw new Error(error.message,{cause:error.cause || 500});
         }
     }
 }

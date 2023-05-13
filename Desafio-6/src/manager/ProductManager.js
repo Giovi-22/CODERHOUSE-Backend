@@ -11,13 +11,13 @@ class ProductManager{
             
             const codeExist = await this.#productManagerDAO.findByFilter({code:{$eq:product.code}});
             if(codeExist.length){
-                throw new Error("El código del producto ya existe",{cause:{statusCode:400}});
+                throw new Error("El código del producto ya existe",{cause:400});
             }
             const newProduct = await this.#productManagerDAO.insertOne(product);
             return newProduct;
 
         } catch (error) {
-            throw new Error(error.message,{cause:error.cause?.statusCode && 500});
+            throw new Error(error.message,{cause:error.cause || 500});
         }
         
     }
@@ -26,7 +26,7 @@ class ProductManager{
             const products = await this.#productManagerDAO.Paginate(options);
             return products;
         } catch (error) {
-            throw new Error(error.message,{cause:error.cause?.statusCode && 500});
+            throw new Error(error.message,{cause:error.cause || 500});
         }
     }
 
@@ -35,7 +35,7 @@ class ProductManager{
             const product = await this.#productManagerDAO.findById(pid);
             return product;
         } catch (error) {
-            throw new Error(error.message,{cause:error.cause?.statusCode && 500});  
+            throw new Error(error.message,{cause:error.cause || 500});  
         }
         
     }
@@ -45,7 +45,7 @@ class ProductManager{
             const updatedProduct = await this.#productManagerDAO.update(pid,data);
             return updatedProduct;
         } catch (error) {
-            throw new Error(error.message,{cause:error.cause?.statusCode && 500}); 
+            throw new Error(error.message,{cause:error.cause || 500}); 
         }
         
     }
@@ -54,7 +54,7 @@ class ProductManager{
             const productDeleted = await this.update(pid,{status:false});
             return productDeleted;
         } catch (error) {
-            throw new Error(error.message,{cause:error.cause?.statusCode && 500}); 
+            throw new Error(error.message,{cause:error.cause || 500}); 
         }
         
     }
